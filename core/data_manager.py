@@ -47,21 +47,6 @@ def verify_password(password, stored_hash, salt):
 
 # ---------- AUTH ----------
 def register_user(username, password, interests=None):
-    """
-    Create a new account. Every account gets a fresh random user_id (uuid4)
-    generated at registration time, and ALL journal/goals/settings data is
-    keyed by user_id rather than by username.
-
-    Why this fixes the "deleted user, same username, old entries reappear"
-    bug: previously everything was keyed by username, which is stable and
-    user-chosen. Delete a user's record from users.json, then let someone
-    (or the same person) register that same username again, and the old
-    username-keyed rows in journal_entries.json / goals_data.json /
-    user_settings.json were still sitting there waiting to be picked back
-    up. Because user_id is freshly generated every time someone registers,
-    a reused username can never collide with old data again — the old rows
-    are simply orphaned under a user_id nothing points to anymore.
-    """
     users = load_json(USERS_PATH)
     if username in users:
         return False, "That username is already taken.", None
@@ -95,6 +80,24 @@ def login_user(username, password):
 
 def get_user_record(username):
     return load_json(USERS_PATH).get(username, {})
+
+
+def delete_user_account(username):
+    """Permanently removes a user's account and every piece of data tied
+    to their user_id (entries, settings). Irreversible."""
+    users = load_json(USERS_PATH)
+    user = users.pop(username, None)
+    save_json(USERS_PATH, users)
+
+    if user:
+        user_id = user.get("user_id")
+        if user_id:
+            for path in (ENTRIES_PATH, SETTINGS_PATH):
+                data = load_json(path)
+                if user_id in data:
+                    del data[user_id]
+                    save_json(path, data)
+    return True
 
 
 # ---------- PER-USER DATA HELPERS (all keyed by user_id) ----------
