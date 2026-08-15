@@ -5,6 +5,16 @@ import re
 from datetime import datetime, timedelta
 from collections import Counter
 
+from core import data_manager as dm
+entries = dm.get_user_entries(st.session_state.user_id)
+
+from core.layout import require_login, render_account_bar
+from core.styles import inject_global_css
+
+inject_global_css()
+require_login()
+render_account_bar()
+
 st.set_page_config(page_title="Insights - Sanctuary", page_icon=":material/monitoring:", layout="wide")
 
 # ---------- CONFIG ----------
@@ -110,7 +120,8 @@ def mood_for_entry(entry):
 
 
 # ---------- LOAD DATA ----------
-all_entries = load_json(ENTRIES_FILE).get(username, [])
+# all_entries = load_json(ENTRIES_FILE).get(username, [])
+dm.save_user_entries(st.session_state.user_id, entries)
 week_entries = get_week_entries(all_entries)
 
 # --- Hobby/Goals log loading (commented out until those pages exist) ---

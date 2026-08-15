@@ -4,6 +4,13 @@ import os
 import random
 from datetime import datetime
 
+from core.layout import require_login, render_account_bar
+from core.styles import inject_global_css
+
+inject_global_css()
+require_login()
+render_account_bar()
+
 st.set_page_config(page_title="Journal - Sanctuary", page_icon="📝", layout="wide")
 
 # ---------- CONFIG ----------
