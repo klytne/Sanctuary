@@ -164,7 +164,6 @@ st.markdown("""
 
 # ---------- HEADER ----------
 st.title("Journal")
-st.caption("Writing Reflection")
 
 # Quote of the day
 quote, author = st.session_state.daily_quote
@@ -235,17 +234,49 @@ with col_sidebar:
             st.rerun()
 
     st.write("")
-    if st.button("🔄 Shuffle Prompts", use_container_width=True):
+    if st.button("Shuffle Prompts", icon=":material/refresh:", use_container_width=True):
         st.session_state.shuffled_prompts = random.sample(PROMPTS, 4)
         st.rerun()
 
 # ---------- PAST ENTRIES ----------
 st.divider()
 
-if "selected_entry_index" not in st.session_state:
-    st.session_state.selected_entry_index = None
 if "confirm_delete" not in st.session_state:
     st.session_state.confirm_delete = False
+
+
+@st.dialog("Journal Entry")
+def show_entry_dialog(entry_index):
+    entries = load_entries().get(username, [])
+    entry = entries[entry_index]
+
+    st.markdown(f"**{entry['title']}**")
+    st.caption(f"{entry['date']} at {entry['time']}")
+
+    if entry.get("prompt_used"):
+        st.caption(f":material/lightbulb: Prompt: {entry['prompt_used']}")
+
+    st.write(entry["body"])
+    st.divider()
+
+    if not st.session_state.confirm_delete:
+        if st.button("Delete", icon=":material/delete:", use_container_width=True):
+            st.session_state.confirm_delete = True
+            st.rerun()
+    else:
+        st.warning("Are you sure you want to delete this entry? This can't be undone.")
+        col_yes, col_no = st.columns(2)
+        with col_yes:
+            if st.button("Yes, delete it", type="primary", use_container_width=True):
+                delete_entry(username, entry_index)
+                st.session_state.confirm_delete = False
+                st.success("Entry deleted.")
+                st.rerun()
+        with col_no:
+            if st.button("Cancel", use_container_width=True):
+                st.session_state.confirm_delete = False
+                st.rerun()
+
 
 with st.expander("View past entries", icon=":material/menu_book:"):
     entries = load_entries().get(username, [])
@@ -256,45 +287,7 @@ with st.expander("View past entries", icon=":material/menu_book:"):
         # Reverse so newest entries show first, but keep track of original index
         reversed_entries = list(reversed(list(enumerate(entries))))
 
-        if st.session_state.selected_entry_index is None:
-            # ---- LIST VIEW: just titles/dates, clickable ----
-            for original_index, entry in reversed_entries:
-                label = f"{entry['title']} — {entry['date']} at {entry['time']}"
-                if st.button(label, key=f"entry_{original_index}", use_container_width=True):
-                    st.session_state.selected_entry_index = original_index
-                    st.rerun()
-
-        else:
-            # ---- DETAIL VIEW: full entry for the selected one ----
-            entry = entries[st.session_state.selected_entry_index]
-
-            col_back, col_delete = st.columns([3, 1])
-            with col_back:
-                if st.button("Back to all entries", icon=":material/arrow_back:"):
-                    st.session_state.selected_entry_index = None
-                    st.session_state.confirm_delete = False
-                    st.rerun()
-            with col_delete:
-                if st.button("Delete", icon=":material/delete:", use_container_width=True):
-                    st.session_state.confirm_delete = True
-                    st.rerun()
-
-            st.markdown(f"**{entry['title']}** — {entry['date']} at {entry['time']}")
-            if entry.get("prompt_used"):
-                st.caption(f":material/lightbulb: Prompt: {entry['prompt_used']}")
-            st.write(entry["body"])
-
-            if st.session_state.confirm_delete:
-                st.warning("Are you sure you want to delete this entry? This can't be undone.")
-                col_yes, col_no = st.columns(2)
-                with col_yes:
-                    if st.button("Yes, delete it", type="primary", use_container_width=True):
-                        delete_entry(username, st.session_state.selected_entry_index)
-                        st.session_state.selected_entry_index = None
-                        st.session_state.confirm_delete = False
-                        st.success("Entry deleted.")
-                        st.rerun()
-                with col_no:
-                    if st.button("Cancel", use_container_width=True):
-                        st.session_state.confirm_delete = False
-                        st.rerun()
+        for original_index, entry in reversed_entries:
+            label = f"{entry['title']} — {entry['date']} at {entry['time']}"
+            if st.button(label, key=f"entry_{original_index}", use_container_width=True):
+                show_entry_dialog(original_index)
