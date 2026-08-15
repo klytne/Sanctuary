@@ -1,0 +1,326 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>LifeFlow - Hobby Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style data-purpose="theme-config">
+    :root {
+      --font-manrope: 'Manrope', sans-serif;
+      --color-brand: #4a6751; /* Darker green from image */
+      --color-brand-light: #d8e4d2; /* Lighter green for active state */
+      --color-brand-badge: #687e6a; /* Badge green */
+      --color-surface: #f7f7f7;
+      --color-surface-container: #ffffff;
+      --color-text: #333333;
+      --color-text-muted: #666666;
+      --color-border: #e5e7eb;
+      --radius-8: 0.5rem; /* Equivalent to ROUND_EIGHT roughly */
+    }
+    body {
+      font-family: var(--font-manrope);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+    }
+  </style>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#4a6751',
+              light: '#d8e4d2',
+              badge: '#687e6a',
+              hover: '#3d5642'
+            },
+            surface: {
+              DEFAULT: '#f7f7f7',
+              card: '#ffffff'
+            }
+          },
+          borderRadius: {
+            '8': '0.5rem',
+            'xl': '1rem'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 bg-surface border-r border-gray-200 flex flex-col justify-between" data-purpose="sidebar">
+<div>
+<!-- Brand -->
+<div class="px-6 py-8 flex items-center gap-3">
+<i class="fa-solid fa-leaf text-brand text-xl"></i>
+<span class="font-bold text-lg text-gray-800">LifeFlow</span>
+</div>
+<!-- Navigation -->
+<nav class="px-4 space-y-2 mt-4" data-purpose="main-navigation">
+<a class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-8 transition-colors" href="#">
+<i class="fa-solid fa-border-all w-5"></i>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-8 transition-colors" href="#">
+<i class="fa-solid fa-seedling w-5"></i>
+<span class="font-medium">Mindful Goals</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-brand-light text-brand font-semibold rounded-8 transition-colors" href="#">
+<i class="fa-regular fa-clock w-5"></i>
+<span>Hobby Tracker</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-8 transition-colors" href="#">
+<i class="fa-solid fa-chart-line w-5"></i>
+<span class="font-medium">Weekly Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-8 transition-colors mt-8" href="#">
+<i class="fa-solid fa-gear w-5"></i>
+<span class="font-medium">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Actions -->
+<div class="px-6 pb-8 space-y-6">
+<button class="w-full bg-brand text-white py-3 rounded-8 font-medium hover:bg-brand-hover transition-colors shadow-sm">
+        Start New Session
+      </button>
+<div class="flex justify-center gap-6 text-sm text-gray-500">
+<a class="hover:text-gray-800 flex items-center gap-1" href="#"><i class="fa-regular fa-circle-question"></i> Help</a>
+<a class="hover:text-gray-800 flex items-center gap-1" href="#"><i class="fa-solid fa-shield-halved"></i> Privacy</a>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Content -->
+<main class="flex-1 flex flex-col h-full bg-[#fcfbf9]" data-purpose="main-layout">
+<!-- BEGIN: Top Header -->
+<header class="h-20 border-b border-gray-200 bg-white flex items-center justify-between px-10" data-purpose="top-header">
+<!-- Tabs -->
+<nav class="flex gap-8 h-full items-center">
+<a class="text-gray-500 font-medium hover:text-gray-900 transition-colors" href="#">Focus</a>
+<a class="text-gray-500 font-medium hover:text-gray-900 transition-colors" href="#">Rest</a>
+<a class="text-gray-900 font-medium border-b-2 border-gray-900 h-full flex items-center px-1 pt-1" href="#">Growth</a>
+</nav>
+<!-- Search & Profile -->
+<div class="flex items-center gap-6">
+<div class="relative">
+<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+<input class="pl-10 pr-4 py-2 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-brand w-64" placeholder="Search hobbies..." type="text">
+</div>
+<button class="text-gray-500 hover:text-gray-800"><i class="fa-regular fa-bell text-lg"></i></button>
+<button class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-gear text-lg"></i></button>
+<img alt="User Profile" class="w-10 h-10 rounded-full border border-gray-200 cursor-pointer object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPtcqmo0zFySfm8FPQpc-jGtBkQQniJw0lyAkcnZtDdKt9caTEmS_SaY13DktX4yYA_tiu28H8yE9feXiTknm6ec09JVta8KzYkYWeNwg-Nt-q9gvNoCPWPtNdxdd6Z6rn6a9toS6Fiw7qk7iTRM9RfCCNiog8eLmDK95Rbmrm6yMwAu7uYbOsNehQA8SOg8uRxJoM-Wiv20BNwXlH2wXve0DjrIQPhHBBiILBGdwjx712Nlxd4uht">
+</div>
+</header>
+<!-- END: Top Header -->
+<!-- BEGIN: Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-10 space-y-12">
+<!-- BEGIN: Active Hobbies Section -->
+<section data-purpose="active-hobbies">
+<h2 class="text-xl font-medium text-gray-800 mb-6">Active Hobbies</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-medium text-lg text-gray-900">Urban Sketching</h3>
+<span class="bg-brand-badge text-white text-xs px-3 py-1 rounded-full">Active</span>
+</div>
+<p class="text-gray-600 text-sm mb-8 flex-1 leading-relaxed">Documenting your surroundings through mindful observation.</p>
+<div class="space-y-3">
+<button class="w-full bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-play text-xs"></i> Start Session
+              </button>
+<button class="w-full bg-white text-gray-700 py-2.5 rounded-8 font-medium border border-gray-300 hover:bg-gray-50 transition-colors">
+                View Insights
+              </button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-medium text-lg text-gray-900">Creative Writing</h3>
+<span class="bg-brand-badge text-white text-xs px-3 py-1 rounded-full">Active</span>
+</div>
+<p class="text-gray-600 text-sm mb-8 flex-1 leading-relaxed">Expressing inner thoughts and building new worlds.</p>
+<div class="space-y-3">
+<button class="w-full bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-play text-xs"></i> Start Session
+              </button>
+<button class="w-full bg-white text-gray-700 py-2.5 rounded-8 font-medium border border-gray-300 hover:bg-gray-50 transition-colors">
+                View Insights
+              </button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-medium text-lg text-gray-900">Pottery Making</h3>
+<span class="bg-brand-badge text-white text-xs px-3 py-1 rounded-full">Active</span>
+</div>
+<p class="text-gray-600 text-sm mb-8 flex-1 leading-relaxed">Tactile and grounding work with clay.</p>
+<div class="space-y-3">
+<button class="w-full bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-play text-xs"></i> Start Session
+              </button>
+<button class="w-full bg-white text-gray-700 py-2.5 rounded-8 font-medium border border-gray-300 hover:bg-gray-50 transition-colors">
+                View Insights
+              </button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Active Hobbies Section -->
+<!-- BEGIN: Discover Section -->
+<section data-purpose="discover-hobbies">
+<h2 class="text-xl font-medium text-gray-800 mb-2">Discover New Pursuits</h2>
+<p class="text-gray-600 mb-6">Explore our curated mindful activities for your growth in <span class="font-semibold text-gray-900">Creativity</span> and <span class="font-semibold text-gray-900">Tech</span>.</p>
+<div class="mb-10">
+<span class="text-xs text-gray-500 uppercase tracking-wider font-semibold block mb-3">Refine Your Focus</span>
+<div class="flex gap-3">
+<button class="bg-brand-light text-brand px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 border border-transparent">
+              Creativity <i class="fa-solid fa-xmark text-xs opacity-60"></i>
+</button>
+<button class="bg-brand-light text-brand px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 border border-transparent">
+              Tech <i class="fa-solid fa-xmark text-xs opacity-60"></i>
+</button>
+</div>
+</div>
+<!-- Creativity Category -->
+<div class="mb-12">
+<h3 class="text-lg font-medium text-gray-800 mb-6">Creativity</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Discovery Card 1 -->
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="relative h-48 rounded-lg overflow-hidden mb-4">
+<img alt="Urban Sketching" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgWEpH2e9T2CmVQfa_5IpszoFEPRG3u1E4TpSnmJHn9zkiRe16VVCCmnbfUsE4vAendAQ7FAcK9Co3R8eu6yBk9W0TZQIKKr9BVhOQWyMRIuF6BIbBs9LKKIHK58iDnZrXo6I40TOplQ9O2E1FJPy9dHyu-P3kVtIXOCg9dTEgS1qYS1O7MxZB6CWfk4suqyhPCFAt-tdOA2WuhOp49Wjsqqnrf5raADvSc661sgNC6uaojZ-j8tJp">
+<span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+<i class="fa-solid fa-binoculars text-[10px]"></i> Observation
+                </span>
+</div>
+<h4 class="font-medium text-lg text-gray-900 mb-2">Urban Sketching</h4>
+<p class="text-gray-600 text-sm mb-6 flex-1 leading-relaxed">Step outside and document your surroundings. A practice in mindfulness, observation, and being present in your city.</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-plus"></i> Add to Hobbies
+                </button>
+<button class="w-11 h-11 flex items-center justify-center border border-gray-300 rounded-8 text-gray-600 hover:bg-gray-50 transition-colors">
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+<!-- Discovery Card 2 -->
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="relative h-48 rounded-lg overflow-hidden mb-4">
+<img alt="Creative Writing" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0rD1pwiwNh3loQCR3cI58IgIOHtkaO46iquQ7_0IJ8yr3IhHd2IeEwB9bFssHHUqSj4phZHOcusPceHQ7uRHjduLLmQYvAduLOsmDpwohQPVYY7NyozumGRNt_vupAxyqkfD1o_RPwLls-EqP3BHHSJDwnP6O9MKLKsc1FRI0Dvk1UonPanWgfddzWbFqcLPp0tCUVaQMs6VDTSHrDvbcfmWSPBa0acMjt0amHo-RKBxLyuC4nIYo">
+<span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+<i class="fa-solid fa-pen-nib text-[10px]"></i> Writing
+                </span>
+</div>
+<h4 class="font-medium text-lg text-gray-900 mb-2">Creative Writing</h4>
+<p class="text-gray-600 text-sm mb-6 flex-1 leading-relaxed">Express your inner thoughts and build entirely new worlds. Writing is a powerful tool for self-reflection and imagination.</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-plus"></i> Add to Hobbies
+                </button>
+<button class="w-11 h-11 flex items-center justify-center border border-gray-300 rounded-8 text-gray-600 hover:bg-gray-50 transition-colors">
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+<!-- Discovery Card 3 -->
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="relative h-48 rounded-lg overflow-hidden mb-4">
+<img alt="Pottery Making" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuv9d0NAl4_NyEoXMWCZFfNllm7GYL1BGxCMKUJDSku-4F5XwsHxqxuFu--pvBnl1Zt_n9KfpSadB9RBaBcJAGXk2mRoiesYhVs3k0WFbapIj1uF78O6PuVX1a_-r9wlqx4mVuCqyJmoWn_gQtZ_NsDeGzxR77CNIOMmUBEN6kKrVxD0Oxc7sEcUjM-qdQi21qoyO0_r1KR_HCgRAbha_tYg_Xj0l1C8taNCeY1CNMvqLzpKVx_0eK">
+<span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+<i class="fa-solid fa-hand-holding-heart text-[10px]"></i> Crafting
+                </span>
+</div>
+<h4 class="font-medium text-lg text-gray-900 mb-2">Pottery Making</h4>
+<p class="text-gray-600 text-sm mb-6 flex-1 leading-relaxed">Get your hands dirty and create functional art. Working with clay is intensely tactile and grounding.</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-plus"></i> Add to Hobbies
+                </button>
+<button class="w-11 h-11 flex items-center justify-center border border-gray-300 rounded-8 text-gray-600 hover:bg-gray-50 transition-colors">
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Tech Category -->
+<div>
+<h3 class="text-lg font-medium text-gray-800 mb-6">Tech</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Discovery Card 4 -->
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="relative h-48 rounded-lg overflow-hidden mb-4">
+<img alt="Digital Illustration" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFN9DegSNWxZ7uj_2YTQcQ3mCs6t6lZMSICKFa7zM_hTHQCWH7W44oeBjTBMCqp6NIBc75lE9jrnaAKLWIlD89JAj07zGmh4g8u9Kbp9JVGPjLwtnryOFtk15j9hEU178XuW1AzzX0w7Pe0yv-X4hMNbWcFijkC789hpdI8lRnrwwtDgTBIWDud4KiD9VjTV3V-lX4XwaAyGDeA63GnE0AGBPIwPskUQkz-Tm-vgG51DX6fUxi47-p">
+<span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+<i class="fa-solid fa-palette text-[10px]"></i> Art &amp; Tech
+                </span>
+</div>
+<h4 class="font-medium text-lg text-gray-900 mb-2">Digital Illustration</h4>
+<p class="text-gray-600 text-sm mb-6 flex-1 leading-relaxed">Merge traditional artistic skills with modern tools. Perfect for unwinding while developing a new digital skill set.</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-plus"></i> Add to Hobbies
+                </button>
+<button class="w-11 h-11 flex items-center justify-center border border-gray-300 rounded-8 text-gray-600 hover:bg-gray-50 transition-colors">
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+<!-- Discovery Card 5 -->
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="relative h-48 rounded-lg overflow-hidden mb-4">
+<img alt="Creative Coding" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzGVSc9_zUTW-boinU3sh-PFCcb1jn-xykjaYIkNrhFVMEAk_LeMWdy5_lCV8jDjMdlZaKiB7KiRPhTNgeNYWPGuexKT9HBeLJPyhfuaA1Etshq5T8uhuhkZbFDMDZrhRf6xpe3-cZJ43boksHzKyQIYn_w1tZhFQO2mRSlgck6OxrjnRPcjHzCiHLiEYdqTpj8YT6JBToWMzW4Bs4ozwUBNJBRyhjJeu7kx6_s9Oi1xWI_yyPGLbK">
+<span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+<i class="fa-solid fa-code text-[10px]"></i> Programming
+                </span>
+</div>
+<h4 class="font-medium text-lg text-gray-900 mb-2">Creative Coding</h4>
+<p class="text-gray-600 text-sm mb-6 flex-1 leading-relaxed">Use programming languages to create visual art, music, or interactive experiences. A perfect blend of logic and expression.</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-plus"></i> Add to Hobbies
+                </button>
+<button class="w-11 h-11 flex items-center justify-center border border-gray-300 rounded-8 text-gray-600 hover:bg-gray-50 transition-colors">
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+<!-- Discovery Card 6 -->
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col h-full">
+<div class="relative h-48 rounded-lg overflow-hidden mb-4">
+<img alt="3D Printing" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9_wnAVxa1gm9IDEdl7afQfGLJKSjHpQdvyqEHGz07i0rwEnJxpsgnckzVJhzYYhkPRAmykvB1Dc5EgtDYqhOVo6PiNj6lgPeHS34RmZRMwPCJHr70YFdzahim-WmRaS9FDtQpdCJO42ZrVfVnua_HbahC-A2kFzxt0fliAAUUSWzYTkWVG0OARQhLF_nbBtJe45hto1OnK1mpGboO3-ARGRfaf84tpdPIneUmPhTBPAVMSFxTPOL0">
+<span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5">
+<i class="fa-solid fa-cube text-[10px]"></i> Hardware
+                </span>
+</div>
+<h4 class="font-medium text-lg text-gray-900 mb-2">3D Printing</h4>
+<p class="text-gray-600 text-sm mb-6 flex-1 leading-relaxed">Bring your digital designs into the physical world. Learn modeling, slicing, and the intricacies of additive manufacturing.</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-brand text-white py-2.5 rounded-8 font-medium hover:bg-brand-hover transition-colors flex items-center justify-center gap-2">
+<i class="fa-solid fa-plus"></i> Add to Hobbies
+                </button>
+<button class="w-11 h-11 flex items-center justify-center border border-gray-300 rounded-8 text-gray-600 hover:bg-gray-50 transition-colors">
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Discover Section -->
+</div>
+<!-- END: Scrollable Content -->
+</main>
+<!-- END: Main Content -->
+</body></html>

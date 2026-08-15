@@ -1,0 +1,329 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Settings - Journal Sanctuary</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#d2e6ec",
+                      "on-secondary": "#ffffff",
+                      "primary": "#476550",
+                      "on-secondary-container": "#55676d",
+                      "inverse-primary": "#adcfb5",
+                      "tertiary-fixed-dim": "#e1c1a2",
+                      "surface": "#fbf9f4",
+                      "primary-container": "#7d9d85",
+                      "secondary-fixed-dim": "#b7cad0",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#ad9074",
+                      "surface-container": "#f0eee9",
+                      "on-surface": "#1b1c19",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed": "#ffdcbd",
+                      "surface-dim": "#dbdad5",
+                      "surface-container-highest": "#e4e2dd",
+                      "surface-container-low": "#f5f3ee",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed": "#291805",
+                      "secondary": "#4f6167",
+                      "outline-variant": "#c2c8c1",
+                      "primary-fixed-dim": "#adcfb5",
+                      "outline": "#727972",
+                      "inverse-on-surface": "#f2f1ec",
+                      "on-tertiary-container": "#3d2a15",
+                      "on-primary-fixed-variant": "#304d39",
+                      "background": "#fbf9f4",
+                      "primary-fixed": "#c9ebd0",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed": "#0c1e23",
+                      "error": "#ba1a1a",
+                      "on-background": "#1b1c19",
+                      "surface-bright": "#fbf9f4",
+                      "surface-tint": "#476550",
+                      "on-primary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed": "#032110",
+                      "on-surface-variant": "#424843",
+                      "secondary-fixed": "#d2e6ec",
+                      "surface-variant": "#e4e2dd",
+                      "inverse-surface": "#30312e",
+                      "on-primary-container": "#173422",
+                      "on-secondary-fixed-variant": "#384a4f",
+                      "tertiary": "#725a41",
+                      "on-tertiary-fixed-variant": "#59422b",
+                      "surface-container-high": "#eae8e3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "unit": "8px",
+                      "container-margin": "24px",
+                      "element-gap": "12px",
+                      "section-gap": "48px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Manrope"],
+                      "body-md": ["Literata"],
+                      "label-sm": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "body-lg": ["Literata"],
+                      "headline-xl": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "32px", "fontWeight": "400"}],
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Custom Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #476550; /* primary */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #476550; /* primary */
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed z-20 bg-background full-width top-0 flex justify-between items-center w-full pl-container-margin md:pl-72 pr-container-margin h-20">
+<div class="flex items-center gap-element-gap">
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary md:hidden">Journal Sanctuary</h1>
+</div>
+<div class="flex items-center gap-element-gap">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-highest">
+<span class="material-symbols-outlined">encrypted</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-highest">
+<span class="material-symbols-outlined">security</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-highest">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="ml-2 w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Profile avatar" class="w-full h-full object-cover" data-alt="A serene, minimalist digital portrait of an individual, framed closely, bathed in soft, high-key warm morning light. The background is a pale, creamy #fbf9f4 color, maintaining a calm, protective sanctuary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_pihNF8Uw8G3qhzRk72g8t1jOSReq40IEUZy18EM1ofqb9wH-Y2y2of3zwVDK_3MRbSSmur0KXvTEDfr8d92D9QQApAFq6OiItWRH3Pn4WdF6G-8SLW6oat321PDP8F4T92Llyo2bsxZfr2Vt0ss9wgvGds6qLuJKj3Vk9h6WI2jzpypbwG_JP-ji8LIIlkrwo6qfGFqoC4FkElsFshA0zN1kjwNH6sW_PMxujAoKYv-i1hpFO6su">
+</button>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex flex-col h-full py-8 px-4 h-screen w-64 fixed left-0 top-0 bg-surface-container z-30">
+<div class="mb-12 px-4 flex items-center gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-primary">Sanctuary</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Safe space</p>
+</div>
+</div>
+<button class="mb-12 mx-4 bg-primary text-on-primary rounded-full py-3 px-6 flex items-center justify-center gap-2 font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-[0_4px_30px_rgba(71,101,80,0.1)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            New Entry
+        </button>
+<ul class="flex flex-col gap-2">
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors hover:text-on-surface" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-label-md text-label-md">Journal</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors hover:text-on-surface" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-md text-label-md">Insights</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 px-4 py-3 rounded-full text-on-surface-variant opacity-70 hover:bg-surface-container-highest transition-colors hover:text-on-surface" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-md text-label-md">Goals</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 px-4 py-3 text-primary font-bold border-r-4 border-primary scale-[0.98] transition-all duration-300" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content -->
+<main class="md:ml-64 pt-24 pb-section-gap min-h-screen">
+<div class="max-w-[720px] mx-auto px-container-margin w-full">
+<header class="mb-section-gap">
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-2">Settings</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Configure your sanctuary to best support your mental clarity.</p>
+</header>
+<div class="flex flex-col gap-6">
+<!-- Journaling Frequency -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-lg text-headline-lg md:font-headline-lg-mobile md:text-headline-lg-mobile text-on-surface">Routine &amp; Frequency</h3>
+<span class="material-symbols-outlined text-outline-variant">expand_more</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Establish a gentle rhythm that feels right for you. No pressure, just invitations.</p>
+<div class="flex flex-col gap-3">
+<label class="flex items-center gap-4 p-4 rounded-lg border border-outline-variant hover:bg-surface-container-highest cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/10">
+<input class="w-5 h-5 text-primary border-outline focus:ring-primary focus:ring-offset-background" name="frequency" type="radio" value="daily">
+<div>
+<div class="font-label-md text-label-md text-on-surface">Daily</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">A consistent daily reflection.</div>
+</div>
+</label>
+<label class="flex items-center gap-4 p-4 rounded-lg border border-outline-variant hover:bg-surface-container-highest cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/10">
+<input checked="" class="w-5 h-5 text-primary border-outline focus:ring-primary focus:ring-offset-background" name="frequency" type="radio" value="biweekly">
+<div>
+<div class="font-label-md text-label-md text-on-surface">Bi-weekly</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">Checking in twice a week.</div>
+</div>
+</label>
+<label class="flex items-center gap-4 p-4 rounded-lg border border-outline-variant hover:bg-surface-container-highest cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/10">
+<input class="w-5 h-5 text-primary border-outline focus:ring-primary focus:ring-offset-background" name="frequency" type="radio" value="custom">
+<div>
+<div class="font-label-md text-label-md text-on-surface">Custom</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1">Set your own gentle cadence.</div>
+</div>
+</label>
+</div>
+</section>
+<!-- Notifications -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-lg text-headline-lg md:font-headline-lg-mobile md:text-headline-lg-mobile text-on-surface">Notifications</h3>
+<span class="material-symbols-outlined text-outline-variant">expand_more</span>
+</div>
+<div class="flex items-start justify-between gap-4 py-2">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Personalized Push Notifications</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Allow Sanctuary to gently nudge you based on your activity patterns and chosen frequency. These are designed to be invitations, not interruptions.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in mt-1 shrink-0">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0 left-0 transition-transform duration-300 ease-in-out border-surface-variant" id="toggle1" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-300 ease-in-out" for="toggle1"></label>
+</div>
+</div>
+</section>
+<!-- Privacy & Security -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-lg text-headline-lg md:font-headline-lg-mobile md:text-headline-lg-mobile text-on-surface">Privacy &amp; Security</h3>
+<span class="material-symbols-outlined text-outline-variant">expand_more</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Your reflections are entirely your own. Protect your sanctuary with an additional layer of security.</p>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between group py-2">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">App Lock</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Require a PIN to open the app</p>
+</div>
+</div>
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-highest transition-colors">Set PIN</button>
+</div>
+<hr class="border-outline-variant opacity-50">
+<div class="flex items-center justify-between group py-2">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">fingerprint</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Biometric Unlock</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Use Touch ID or Face ID</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in shrink-0">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0 left-0 transition-transform duration-300 ease-in-out border-surface-variant" id="toggle2" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-300 ease-in-out" for="toggle2"></label>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest pb-safe pt-2 px-4 shadow-[0_-4px_30px_rgba(0,0,0,0.03)] z-20">
+<div class="flex justify-around items-center h-16">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-70 px-4 py-1" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-label-sm text-[10px]">Journal</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-70 px-4 py-1" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-sm text-[10px]">Insights</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant opacity-70 px-4 py-1" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm text-[10px]">Goals</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary font-bold px-4 py-1" href="#">
+<div class="bg-primary-container/30 px-5 py-1 rounded-full mb-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</div>
+<span class="font-label-sm text-[10px]">Settings</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple logic for custom toggle switch visual update
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                if(this.checked) {
+                    this.style.transform = 'translateX(100%)';
+                    this.style.borderColor = '#ffffff';
+                } else {
+                    this.style.transform = 'translateX(0)';
+                    this.style.borderColor = '#e4e2dd'; // surface-variant
+                }
+            });
+            // Init state
+            if(toggle.checked) {
+                toggle.style.transform = 'translateX(100%)';
+                toggle.style.borderColor = '#ffffff';
+            }
+        });
+    </script>
+</body></html>
