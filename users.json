@@ -1,8 +1,10 @@
 {
-  "Ceejay Murray": {
-    "password_hash": "e33d9c8ae91e7891e3312443dd196d702e79dba5ddec71db52d4778c0d1df90d",
-    "salt": "b4fefc18b941e47c7877e2397783adb4",
-    "created_at": "2026-08-15T15:40:03.855480",
-    "interests": []
+  "Carolly ": {
+    "password_hash": "6543e20e35902dece69603fa617ecf7d5e12605d1e76a2b2a365ed96b243eb7c",
+    "salt": "c34502dee3dd1e0474958c40e931905a",
+    "created_at": "2026-08-15T22:44:39.285534",
+    "interests": [
+      "Art & Design"
+    ]
   }
 }
