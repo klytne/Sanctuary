@@ -1,9 +1,3 @@
-"""
-Journal page — Gratitude Journal entry screen
-Save this file as: pages/2_Journal.py
-(Comes right after pages/1_Profile.py — requires login to access)
-"""
-
 import streamlit as st
 import json
 import os
