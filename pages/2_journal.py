@@ -1,0 +1,276 @@
+import streamlit as st
+
+# set_page_config must be the very first Streamlit command in the file
+st.set_page_config(page_title="Journal - Sanctuary", page_icon=":material/edit_note:", layout="wide")
+
+import random
+from datetime import datetime
+
+from core import data_manager as dm
+from core.layout import require_login, render_account_bar
+from core.styles import inject_global_css
+
+inject_global_css()
+require_login()
+render_account_bar()
+
+user_id = st.session_state.user_id
+
+QUOTES = [
+    ("Gratitude turns what we have into enough.", "Aesop"),
+    ("Gratitude is not only the greatest of virtues, but the parent of all others.", "Cicero"),
+    ("Enjoy the little things, for one day you may look back and realize they were the big things.", "Robert Brault"),
+    ("Gratitude makes sense of our past, brings peace for today, and creates a vision for tomorrow.", "Melody Beattie"),
+    ("When you arise in the morning, think of what a precious privilege it is to be alive.", "Marcus Aurelius"),
+    ("He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has.", "Epictetus"),
+    ("Gratitude is the fairest blossom which springs from the soul.", "Henry Ward Beecher"),
+    ("Let us be grateful to people who make us happy; they are the charming gardeners who make our souls blossom.", "Marcel Proust"),
+    ("The unthankful heart discovers no mercies; but the thankful heart will find, in every hour, some heavenly blessings.", "Henry Ward Beecher"),
+    ("Silent gratitude isn't very much use to anyone.", "Gertrude Stein"),
+    ("Gratitude is the memory of the heart.", "Jean Baptiste Massieu"),
+    ("As we express our gratitude, we must never forget that the highest appreciation is not to utter words, but to live by them.", "John F. Kennedy"),
+    ("Piglet noticed that even though he had a Very Small Heart, it could hold a rather large amount of Gratitude.", "A.A. Milne"),
+    ("Feeling gratitude and not expressing it is like wrapping a present and not giving it.", "William Arthur Ward"),
+    ("This is a wonderful day. I've never seen this one before.", "Maya Angelou"),
+    ("Cultivate the habit of being grateful for every good thing that comes to you.", "Ralph Waldo Emerson"),
+    ("There is always, always, always something to be thankful for.", "Ann Voskamp"),
+    ("Joy is the simplest form of gratitude.", "Karl Barth"),
+    ("Reflect upon your present blessings, of which every man has plenty; not on your past misfortunes, of which all men have some.", "Charles Dickens"),
+    ("Wear gratitude like a cloak, and it will feed every corner of your life.", "Rumi"),
+    ("If the only prayer you say in your life is thank you, that would suffice.", "Meister Eckhart"),
+    ("Gratitude helps you to grow and expand.", "Eileen Caddy"),
+    ("When I started counting my blessings, my whole life turned around.", "Willie Nelson"),
+    ("Be thankful for what you have; you'll end up having more.", "Oprah Winfrey"),
+    ("Gratitude turns problems into opportunities and confusion into clarity.", "Deepak Chopra"),
+    ("A grateful mind is a great mind which eventually attracts to itself great things.", "Plato"),
+]
+
+PROMPTS = [
+    "What is one thing you learned today, however small?",
+    "Who or what made you smile today, and why?",
+    "What is a recurring thought you've had lately? Let's unpack it.",
+    "Describe a moment of peace you experienced this week.",
+    "What's something you're looking forward to?",
+    "Name one person you're grateful for and why.",
+    "What's a small comfort you often take for granted?",
+]
+
+
+# ---------- HELPERS ----------
+def save_entry(user_id, title, body, prompt_used=None):
+    entries = dm.get_user_entries(user_id)
+    entries.append({
+        "title": title or "Untitled Entry",
+        "body": body,
+        "prompt_used": prompt_used,
+        "date": datetime.now().strftime("%b %d, %Y"),
+        "time": datetime.now().strftime("%I:%M %p"),
+        "timestamp": datetime.now().isoformat(),
+    })
+    dm.save_user_entries(user_id, entries)
+
+
+def delete_entry(user_id, entry_index):
+    entries = dm.get_user_entries(user_id)
+    if 0 <= entry_index < len(entries):
+        entries.pop(entry_index)
+        dm.save_user_entries(user_id, entries)
+
+
+def get_fresh_quote(user_id):
+    """Returns a gratitude quote the user hasn't seen recently.
+    Once all quotes have been shown, the history resets so they start cycling again."""
+    seen_indices = dm.get_seen_quote_indices(user_id)
+    all_indices = list(range(len(QUOTES)))
+    remaining = [i for i in all_indices if i not in seen_indices]
+
+    if not remaining:
+        remaining = all_indices
+        seen_indices = []
+
+    chosen_index = random.choice(remaining)
+    seen_indices.append(chosen_index)
+    dm.save_seen_quote_indices(user_id, seen_indices)
+
+    return QUOTES[chosen_index]
+
+
+# ---------- SESSION STATE ----------
+if "daily_quote" not in st.session_state:
+    st.session_state.daily_quote = get_fresh_quote(user_id)
+if "shuffled_prompts" not in st.session_state:
+    st.session_state.shuffled_prompts = random.sample(PROMPTS, 4)
+if "selected_prompt" not in st.session_state:
+    st.session_state.selected_prompt = None
+if "entry_nonce" not in st.session_state:
+    st.session_state.entry_nonce = 0   # forces fresh widgets after each save/discard
+if "confirm_delete" not in st.session_state:
+    st.session_state.confirm_delete = False
+if "form_feedback" not in st.session_state:
+    st.session_state.form_feedback = None   # (kind, message) — e.g. ("success", "Entry saved!")
+
+# ---------- STYLING (Sage Green / Cream "Sanctuary" theme) ----------
+st.markdown("""
+<style>
+    .stApp { background-color: #fbf9f4; }
+    .quote-card {
+        background-color: rgba(71,101,80,0.05);
+        border: 1px solid rgba(71,101,80,0.1);
+        border-radius: 16px;
+        padding: 32px;
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .quote-text {
+        font-size: 24px;
+        font-style: italic;
+        color: #476550;
+        font-weight: 600;
+    }
+    .quote-author {
+        color: #424843;
+        opacity: 0.7;
+        margin-top: 8px;
+    }
+    /* Scoped to just these two buttons (via their key=) so long Guided
+       Prompt button labels elsewhere on this page can still wrap normally. */
+    .st-key-discard_btn button, .st-key-save_entry_btn button {
+        white-space: nowrap;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---------- HEADER ----------
+st.title("Journal")
+
+# Quote of the day
+quote, author = st.session_state.daily_quote
+st.markdown(f"""
+<div class="quote-card">
+    <div class="quote-text">"{quote}"</div>
+    <div class="quote-author">— {author}</div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---------- FORM FEEDBACK ----------
+if st.session_state.form_feedback:
+    kind, message = st.session_state.form_feedback
+    getattr(st, kind)(message)
+    st.session_state.form_feedback = None
+
+col_main, col_sidebar = st.columns([2.5, 1])
+
+# ---------- MAIN WRITING AREA ----------
+title_key = f"journal_title_{st.session_state.entry_nonce}"
+body_key = f"journal_body_{st.session_state.entry_nonce}"
+
+with col_main:
+    st.text_input(
+        "Entry Title (Optional)",
+        placeholder="Entry Title (Optional)",
+        label_visibility="collapsed",
+        key=title_key,
+    )
+
+    now = datetime.now()
+    st.caption(f":material/calendar_month: {now.strftime('%b %d, %Y')}   :material/schedule: {now.strftime('%I:%M %p')}")
+
+    if st.session_state.selected_prompt:
+        st.info(f"Prompt: {st.session_state.selected_prompt}", icon=":material/lightbulb:")
+
+    st.text_area(
+        "Start writing your reflection...",
+        placeholder="Start writing your reflection...",
+        height=350,
+        label_visibility="collapsed",
+        key=body_key,
+    )
+
+    col_discard, col_spacer, col_save = st.columns([1.3, 2.4, 1.3])
+    with col_discard:
+        if st.button("Discard", icon=":material/delete:", use_container_width=True, key="discard_btn"):
+            st.session_state.selected_prompt = None
+            st.session_state.entry_nonce += 1   # fresh, empty widgets
+            st.rerun()
+
+    with col_save:
+        if st.button("Save Entry", icon=":material/check_circle:", type="primary", use_container_width=True, key="save_entry_btn"):
+            body_value = st.session_state.get(body_key, "")
+            title_value = st.session_state.get(title_key, "")
+            if not body_value.strip():
+                st.session_state.form_feedback = ("warning", "Write something before saving.")
+                st.rerun()
+            else:
+                save_entry(user_id, title_value, body_value, st.session_state.selected_prompt)
+                st.session_state.form_feedback = ("success", "Entry saved!")
+                st.session_state.selected_prompt = None
+                st.session_state.shuffled_prompts = random.sample(PROMPTS, 4)
+                st.session_state.entry_nonce += 1   # fresh, empty widgets
+                st.rerun()
+
+# ---------- GUIDED PROMPTS SIDEBAR ----------
+with col_sidebar:
+    st.subheader("Guided Prompts")
+    st.caption("Need inspiration? Try answering one of these.")
+
+    for i, prompt in enumerate(st.session_state.shuffled_prompts):
+        if st.button(prompt, key=f"prompt_{i}", use_container_width=True):
+            st.session_state.selected_prompt = prompt
+            st.rerun()
+
+    st.write("")
+    if st.button("Shuffle Prompts", icon=":material/refresh:", use_container_width=True):
+        st.session_state.shuffled_prompts = random.sample(PROMPTS, 4)
+        st.rerun()
+
+# ---------- PAST ENTRIES ----------
+st.divider()
+
+
+@st.dialog("Journal Entry")
+def show_entry_dialog(entry_index):
+    entries = dm.get_user_entries(user_id)
+    entry = entries[entry_index]
+
+    st.markdown(f"**{entry['title']}**")
+    st.caption(f"{entry['date']} at {entry['time']}")
+
+    if entry.get("prompt_used"):
+        st.caption(f":material/lightbulb: Prompt: {entry['prompt_used']}")
+
+    st.write(entry["body"])
+    st.divider()
+
+    if not st.session_state.confirm_delete:
+        if st.button("Delete", icon=":material/delete:", use_container_width=True):
+            st.session_state.confirm_delete = True
+            st.rerun(scope="fragment")
+    else:
+        st.warning("Are you sure you want to delete this entry? This can't be undone.")
+        col_yes, col_no = st.columns(2)
+        with col_yes:
+            if st.button("Yes, delete it", type="primary", use_container_width=True):
+                delete_entry(user_id, entry_index)
+                st.session_state.confirm_delete = False
+                st.session_state.form_feedback = ("success", "Entry deleted.")
+                st.rerun()
+        with col_no:
+            if st.button("Cancel", use_container_width=True):
+                st.session_state.confirm_delete = False
+                st.rerun(scope="fragment")
+
+
+with st.expander("View past entries", icon=":material/menu_book:"):
+    entries = dm.get_user_entries(user_id)
+
+    if not entries:
+        st.write("No entries yet — write your first one above!")
+    else:
+        # Reverse so newest entries show first, but keep track of original index
+        reversed_entries = list(reversed(list(enumerate(entries))))
+
+        for original_index, entry in reversed_entries:
+            label = f"{entry['title']} — {entry['date']} at {entry['time']}"
+            if st.button(label, key=f"entry_{original_index}", use_container_width=True):
+                show_entry_dialog(original_index)
