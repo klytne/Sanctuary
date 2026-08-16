@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Sanctuary - Home", page_icon=":material/spa:", layout="wide")
+st.set_page_config(page_title="Sanctuary", page_icon=":material/spa:", layout="wide")
 
 from core.styles import inject_global_css
 inject_global_css()
