@@ -13,7 +13,9 @@ The journal page comes with a gratitude quote and the author at the top, which t
 ### Goals Page 
 
 Under this page is a list of categories with the user’s tasks for each goal. For each task, there’s a progress bar that helps the user see how much they’ve covered. Most people like check boxes, and we’ve incorporated that so users can see what’s left to do. It also gives a sense of accomplishment to see how many boxes they’ve ticked. Each time the user works on their task, they time themselves and log the time spent on the app. 
-Hobbies Tracker Page 
+
+### Hobbies Tracker Page 
+
 This page shows the user’s active hobbies and allows them to add new suggested hobbies that align with their interests. This way, they could explore different hobbies and get to know themselves a little more. Each time the user engages in their active hobbies, they log the time spent upon completion.  
 
 ### Insights Page
