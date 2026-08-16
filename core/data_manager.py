@@ -119,3 +119,13 @@ def save_user_settings(user_id, settings):
     all_settings = load_json(SETTINGS_PATH)
     all_settings[user_id] = settings
     save_json(SETTINGS_PATH, all_settings)
+
+
+def get_seen_quote_indices(user_id):
+    return load_json(QUOTES_PATH).get(user_id, [])
+
+
+def save_seen_quote_indices(user_id, indices):
+    all_history = load_json(QUOTES_PATH)
+    all_history[user_id] = indices
+    save_json(QUOTES_PATH, all_history)

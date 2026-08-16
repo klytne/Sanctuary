@@ -1,9 +1,12 @@
 import streamlit as st
-import json
-import os
+
+# set_page_config must be the very first Streamlit command in the file
+st.set_page_config(page_title="Journal - Sanctuary", page_icon=":material/edit_note:", layout="wide")
+
 import random
 from datetime import datetime
 
+from core import data_manager as dm
 from core.layout import require_login, render_account_bar
 from core.styles import inject_global_css
 
@@ -11,16 +14,7 @@ inject_global_css()
 require_login()
 render_account_bar()
 
-st.set_page_config(page_title="Journal - Sanctuary", page_icon="📝", layout="wide")
-
-# ---------- CONFIG ----------
-DATA_STORAGE_DIR = "Data_Storage"
-JOURNAL_ENTRIES_DIR = os.path.join(DATA_STORAGE_DIR, "journal_entries")
-ENTRIES_FILE = os.path.join(JOURNAL_ENTRIES_DIR, "journal_entries.json")
-
-os.makedirs(JOURNAL_ENTRIES_DIR, exist_ok=True)
-
-QUOTE_HISTORY_FILE = os.path.join(DATA_STORAGE_DIR, "journal_entries", "quote_history.json")
+user_id = st.session_state.user_id
 
 QUOTES = [
     ("Gratitude turns what we have into enough.", "Aesop"),
@@ -61,27 +55,11 @@ PROMPTS = [
     "What's a small comfort you often take for granted?",
 ]
 
-# ---------- ACCESS CONTROL ----------
-if not st.session_state.get("logged_in"):
-    st.warning("Please log in first.")
-    st.page_link("pages/1_Profile.py", label="Go to Profile / Login", icon="👤")
-    st.stop()
-
-username = st.session_state.username
 
 # ---------- HELPERS ----------
-def load_entries():
-    if not os.path.exists(ENTRIES_FILE):
-        return {}
-    with open(ENTRIES_FILE, "r") as f:
-        return json.load(f)
-
-
-def save_entry(username, title, body, prompt_used=None):
-    os.makedirs(JOURNAL_ENTRIES_DIR, exist_ok=True)
-    entries = load_entries()
-    entries.setdefault(username, [])
-    entries[username].append({
+def save_entry(user_id, title, body, prompt_used=None):
+    entries = dm.get_user_entries(user_id)
+    entries.append({
         "title": title or "Untitled Entry",
         "body": body,
         "prompt_used": prompt_used,
@@ -89,55 +67,47 @@ def save_entry(username, title, body, prompt_used=None):
         "time": datetime.now().strftime("%I:%M %p"),
         "timestamp": datetime.now().isoformat(),
     })
-    with open(ENTRIES_FILE, "w") as f:
-        json.dump(entries, f, indent=2)
+    dm.save_user_entries(user_id, entries)
 
-def delete_entry(username, entry_index):
-    entries = load_entries()
-    user_entries = entries.get(username, [])
-    if 0 <= entry_index < len(user_entries):
-        user_entries.pop(entry_index)
-        entries[username] = user_entries
-        with open(ENTRIES_FILE, "w") as f:
-            json.dump(entries, f, indent=2)
 
-def get_fresh_quote(username):
+def delete_entry(user_id, entry_index):
+    entries = dm.get_user_entries(user_id)
+    if 0 <= entry_index < len(entries):
+        entries.pop(entry_index)
+        dm.save_user_entries(user_id, entries)
+
+
+def get_fresh_quote(user_id):
     """Returns a gratitude quote the user hasn't seen recently.
     Once all quotes have been shown, the history resets so they start cycling again."""
-    if os.path.exists(QUOTE_HISTORY_FILE):
-        with open(QUOTE_HISTORY_FILE, "r") as f:
-            history = json.load(f)
-    else:
-        history = {}
-
-    seen_indices = history.get(username, [])
+    seen_indices = dm.get_seen_quote_indices(user_id)
     all_indices = list(range(len(QUOTES)))
     remaining = [i for i in all_indices if i not in seen_indices]
 
     if not remaining:
-        # Seen them all — reset so they start seeing quotes again
         remaining = all_indices
         seen_indices = []
 
     chosen_index = random.choice(remaining)
     seen_indices.append(chosen_index)
-
-    history[username] = seen_indices
-    os.makedirs(os.path.dirname(QUOTE_HISTORY_FILE), exist_ok=True)
-    with open(QUOTE_HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=2)
+    dm.save_seen_quote_indices(user_id, seen_indices)
 
     return QUOTES[chosen_index]
 
+
 # ---------- SESSION STATE ----------
 if "daily_quote" not in st.session_state:
-    st.session_state.daily_quote = get_fresh_quote(username)
+    st.session_state.daily_quote = get_fresh_quote(user_id)
 if "shuffled_prompts" not in st.session_state:
     st.session_state.shuffled_prompts = random.sample(PROMPTS, 4)
 if "selected_prompt" not in st.session_state:
     st.session_state.selected_prompt = None
 if "entry_nonce" not in st.session_state:
     st.session_state.entry_nonce = 0   # forces fresh widgets after each save/discard
+if "confirm_delete" not in st.session_state:
+    st.session_state.confirm_delete = False
+if "form_feedback" not in st.session_state:
+    st.session_state.form_feedback = None   # (kind, message) — e.g. ("success", "Entry saved!")
 
 # ---------- STYLING (Sage Green / Cream "Sanctuary" theme) ----------
 st.markdown("""
@@ -162,8 +132,10 @@ st.markdown("""
         opacity: 0.7;
         margin-top: 8px;
     }
-    div.stButton > button {
-        border-radius: 999px;
+    /* Scoped to just these two buttons (via their key=) so long Guided
+       Prompt button labels elsewhere on this page can still wrap normally. */
+    .st-key-discard_btn button, .st-key-save_entry_btn button {
+        white-space: nowrap;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -180,6 +152,12 @@ st.markdown(f"""
     <div class="quote-author">— {author}</div>
 </div>
 """, unsafe_allow_html=True)
+
+# ---------- FORM FEEDBACK ----------
+if st.session_state.form_feedback:
+    kind, message = st.session_state.form_feedback
+    getattr(st, kind)(message)
+    st.session_state.form_feedback = None
 
 col_main, col_sidebar = st.columns([2.5, 1])
 
@@ -209,22 +187,23 @@ with col_main:
         key=body_key,
     )
 
-    col_discard, col_spacer, col_save = st.columns([1, 3, 1])
+    col_discard, col_spacer, col_save = st.columns([1.3, 2.4, 1.3])
     with col_discard:
-        if st.button("Discard", icon=":material/delete:", use_container_width=True):
+        if st.button("Discard", icon=":material/delete:", use_container_width=True, key="discard_btn"):
             st.session_state.selected_prompt = None
             st.session_state.entry_nonce += 1   # fresh, empty widgets
             st.rerun()
 
     with col_save:
-        if st.button("Save Entry", icon=":material/check_circle:", type="primary", use_container_width=True):
+        if st.button("Save Entry", icon=":material/check_circle:", type="primary", use_container_width=True, key="save_entry_btn"):
             body_value = st.session_state.get(body_key, "")
             title_value = st.session_state.get(title_key, "")
             if not body_value.strip():
-                st.warning("Write something before saving.")
+                st.session_state.form_feedback = ("warning", "Write something before saving.")
+                st.rerun()
             else:
-                save_entry(username, title_value, body_value, st.session_state.selected_prompt)
-                st.success("Entry saved!")
+                save_entry(user_id, title_value, body_value, st.session_state.selected_prompt)
+                st.session_state.form_feedback = ("success", "Entry saved!")
                 st.session_state.selected_prompt = None
                 st.session_state.shuffled_prompts = random.sample(PROMPTS, 4)
                 st.session_state.entry_nonce += 1   # fresh, empty widgets
@@ -248,13 +227,10 @@ with col_sidebar:
 # ---------- PAST ENTRIES ----------
 st.divider()
 
-if "confirm_delete" not in st.session_state:
-    st.session_state.confirm_delete = False
-
 
 @st.dialog("Journal Entry")
 def show_entry_dialog(entry_index):
-    entries = load_entries().get(username, [])
+    entries = dm.get_user_entries(user_id)
     entry = entries[entry_index]
 
     st.markdown(f"**{entry['title']}**")
@@ -269,24 +245,24 @@ def show_entry_dialog(entry_index):
     if not st.session_state.confirm_delete:
         if st.button("Delete", icon=":material/delete:", use_container_width=True):
             st.session_state.confirm_delete = True
-            st.rerun()
+            st.rerun(scope="fragment")
     else:
         st.warning("Are you sure you want to delete this entry? This can't be undone.")
         col_yes, col_no = st.columns(2)
         with col_yes:
             if st.button("Yes, delete it", type="primary", use_container_width=True):
-                delete_entry(username, entry_index)
+                delete_entry(user_id, entry_index)
                 st.session_state.confirm_delete = False
-                st.success("Entry deleted.")
+                st.session_state.form_feedback = ("success", "Entry deleted.")
                 st.rerun()
         with col_no:
             if st.button("Cancel", use_container_width=True):
                 st.session_state.confirm_delete = False
-                st.rerun()
+                st.rerun(scope="fragment")
 
 
 with st.expander("View past entries", icon=":material/menu_book:"):
-    entries = load_entries().get(username, [])
+    entries = dm.get_user_entries(user_id)
 
     if not entries:
         st.write("No entries yet — write your first one above!")
