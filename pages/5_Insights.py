@@ -256,8 +256,7 @@ with col_stats:
     st.write("")
 
     current_streak, streak_days = get_current_streak_days(all_entries)
-
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    
     st.markdown('<div class="metric-label">Streak</div>', unsafe_allow_html=True)
     st.markdown(f"🔥 **{current_streak} days**")
 
