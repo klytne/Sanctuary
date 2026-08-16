@@ -83,7 +83,7 @@ with col_actions:
 st.markdown("""
     <div class="hero-title">A calm space for <span class="accent">gratitude</span></div>
     
-            <div class="hero-sub">
+    <div class="hero-sub">
         Sanctuary is a gentle journal for reflecting on your day, tracking your mood,
         and noticing the small things worth being thankful for — at your own pace.
     </div>
