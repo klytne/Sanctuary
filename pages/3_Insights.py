@@ -1,15 +1,24 @@
 import streamlit as st
-import json
-import os
+
+# set_page_config must be the very first Streamlit command in the file
+st.set_page_config(page_title="Insights - Sanctuary", page_icon=":material/monitoring:", layout="wide")
+
 import re
 from datetime import datetime, timedelta
 from collections import Counter
 
-st.set_page_config(page_title="Insights - Sanctuary", page_icon=":material/monitoring:", layout="wide")
+from core import data_manager as dm
+from core.layout import require_login, render_account_bar
+from core.styles import inject_global_css
+
+inject_global_css()
+require_login()  # redirects to Login if not logged in — do this before touching session_state.user_id
+render_account_bar()
+
+username = st.session_state.username
+all_entries = dm.get_user_entries(st.session_state.user_id)
 
 # ---------- CONFIG ----------
-DATA_STORAGE_DIR = "Data_Storage"
-ENTRIES_FILE = os.path.join(DATA_STORAGE_DIR, "journal_entries", "journal_entries.json")
 MOOD_EMOJI = {"Tired": "🥱", "Neutral": "😐", "Happy": "🙂", "Grateful": "😊"}
 
 # --- Hobby/Goals log files (not wired up yet — commented out until those pages exist) ---
@@ -25,23 +34,8 @@ THEME_KEYWORDS = [
     "music", "food", "home", "pets", "sunshine", "rest",
 ]
 
-# ---------- ACCESS CONTROL ----------
-if not st.session_state.get("logged_in"):
-    st.warning("Please log in first.")
-    st.page_link("pages/1_Profile.py", label="Go to Profile / Login", icon=":material/person:")
-    st.stop()
-
-username = st.session_state.username
-
 
 # ---------- HELPERS ----------
-def load_json(path):
-    if not os.path.exists(path):
-        return {}
-    with open(path, "r") as f:
-        return json.load(f)
-
-
 def get_week_entries(entries):
     """Entries from the last 7 days, most recent last."""
     cutoff = datetime.now() - timedelta(days=7)
@@ -110,7 +104,6 @@ def mood_for_entry(entry):
 
 
 # ---------- LOAD DATA ----------
-all_entries = load_json(ENTRIES_FILE).get(username, [])
 week_entries = get_week_entries(all_entries)
 
 # --- Hobby/Goals log loading (commented out until those pages exist) ---
@@ -264,7 +257,7 @@ with col_stats:
 
     current_streak, streak_days = get_current_streak_days(all_entries)
 
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    # st.markdown('<div class="metric-card">', unsafe_allow_html=True)
     st.markdown('<div class="metric-label">Streak</div>', unsafe_allow_html=True)
     st.markdown(f"🔥 **{current_streak} days**")
 
@@ -298,7 +291,7 @@ with col_stats:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------- GRATITUDE THEMES ----------
-st.markdown('<div class="insight-card">', unsafe_allow_html=True)
+# st.markdown('<div class="insight-card">', unsafe_allow_html=True)
 st.markdown("##### :material/favorite: Gratitude Themes")
 st.caption("Recurring subjects in your entries this week:")
 if themes:

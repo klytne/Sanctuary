@@ -1,20 +1,29 @@
 """
-Settings page
-Save this file as: pages/5_Settings.py
-(Comes right after pages/4_Goals.py — requires login to access)
+pages/5_Settings.py — Settings
+
+Requires login (see require_login() below). Each section is rendered as a
+white, rounded, expandable card — Streamlit's st.expander gives us the
+header + chevron look for free, styled via the CSS block further down.
 """
 
 import streamlit as st
-import json
-import os
-import hashlib
+
+# set_page_config must be the very first Streamlit command in the file
+st.set_page_config(page_title="Settings - Sanctuary", page_icon=":material/settings:", layout="centered")
+
 from datetime import time
 
-st.set_page_config(page_title="Settings - Sanctuary", page_icon="⚙️", layout="centered")
+from core import data_manager as dm
+from core.layout import require_login, render_account_bar
+from core.styles import inject_global_css
+
+inject_global_css()
+require_login()
+render_account_bar()
+
+username = st.session_state.username
 
 # ---------- CONFIG ----------
-SETTINGS_FILE = "user_settings.json"
-
 INTEREST_OPTIONS = [
     "Reading", "Fitness", "Art & Design", "Music", "Cooking", "Writing",
     "Gardening", "Gaming", "Photography", "Finance", "Content Creation",
@@ -26,75 +35,57 @@ DEFAULT_SETTINGS = {
     "reminder_time": "09:00",
     "push_notifications": True,
     "gentle_nudges": True,
+    "email_notifications": False,
+    "email": "",
     "streak_goal_minutes": 10,
     "interests": [],
-    "app_lock_enabled": False,
-    "app_lock_pin_hash": None,
-    "biometric_enabled": False,
 }
-
-# ---------- ACCESS CONTROL ----------
-if not st.session_state.get("logged_in"):
-    st.warning("Please log in first.")
-    st.page_link("pages/1_Profile.py", label="Go to Profile / Login", icon="👤")
-    st.stop()
-
-username = st.session_state.username
 
 
 # ---------- HELPERS ----------
-def load_all_settings():
-    if not os.path.exists(SETTINGS_FILE):
-        return {}
-    with open(SETTINGS_FILE, "r") as f:
-        return json.load(f)
+def load_settings():
+    return {**DEFAULT_SETTINGS, **dm.get_user_settings(st.session_state.user_id)}
 
 
-def save_all_settings(data):
-    with open(SETTINGS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-
-
-def get_user_settings():
-    all_settings = load_all_settings()
-    user_settings = {**DEFAULT_SETTINGS, **all_settings.get(username, {})}
-    return user_settings
-
-
-def update_user_settings(updates):
-    all_settings = load_all_settings()
-    current = {**DEFAULT_SETTINGS, **all_settings.get(username, {})}
+def save_settings(updates):
+    current = load_settings()
     current.update(updates)
-    all_settings[username] = current
-    save_all_settings(all_settings)
-
-
-def hash_pin(pin):
-    return hashlib.sha256(pin.encode()).hexdigest()
+    dm.save_user_settings(st.session_state.user_id, current)
 
 
 # ---------- STYLING ----------
 st.markdown("""
 <style>
-    .stApp { background-color: #fbf9f4; }
-    .settings-section {
-        background: #ffffff; border: 1px solid #e4e2dd; border-radius: 14px;
-        padding: 24px; margin-bottom: 18px;
+    /* Card-style expanders, matching the reference design */
+    [data-testid="stExpander"] {
+        background: #ffffff;
+        border: 1px solid #e4e2dd;
+        border-radius: 14px;
+        margin-bottom: 18px;
+    }
+    [data-testid="stExpander"] summary {
+        padding: 18px 24px;
+    }
+    [data-testid="stExpander"] summary p {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1b1c19;
+    }
+    [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+        padding: 0 24px 22px 24px;
     }
 </style>
 """, unsafe_allow_html=True)
 
 
-settings = get_user_settings()
+settings = load_settings()
 
 # ---------- HEADER ----------
-st.title("⚙️ Settings")
+st.title("Settings")
 st.caption("Configure your sanctuary to best support your mental clarity.")
 
 # ---------- ROUTINE & FREQUENCY ----------
-with st.container():
-    st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.subheader("Routine & Frequency")
+with st.expander("Routine & Frequency", expanded=False):
     st.caption("Establish a gentle rhythm that feels right for you. No pressure, just invitations.")
 
     frequency = st.radio(
@@ -112,13 +103,9 @@ with st.container():
         "What time should we remind you?",
         value=time.fromisoformat(settings["reminder_time"]),
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------- NOTIFICATIONS ----------
-with st.container():
-    st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.subheader("Notifications")
-
+with st.expander("Notifications", expanded=False):
     push_notifications = st.toggle(
         "Personalized push notifications",
         value=settings["push_notifications"],
@@ -132,24 +119,32 @@ with st.container():
         help="If you close the app with an unsaved journal entry or a hobby/goal timer "
              "still running, we'll send a gentle reminder next time you open the app.",
     )
-    st.markdown('</div>', unsafe_allow_html=True)
+
+    email_notifications = st.toggle(
+        "Email notifications",
+        value=settings["email_notifications"],
+        help="Get a weekly summary and reminder emails sent to your inbox instead of "
+             "(or alongside) push notifications.",
+    )
+
+    email_address = st.text_input(
+        "Email address",
+        value=settings["email"],
+        placeholder="you@example.com",
+        disabled=not email_notifications,
+    )
 
 # ---------- STREAKS ----------
-with st.container():
-    st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.subheader("Streaks")
+with st.expander("Streaks", expanded=False):
     st.caption("Build a habit with a minimum daily time goal — keep the streak alive!")
 
     streak_goal = st.slider(
         "Minimum minutes on the app per day to keep your streak",
         min_value=1, max_value=60, value=settings["streak_goal_minutes"],
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------- INTERESTS ----------
-with st.container():
-    st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.subheader("Your Interests")
+with st.expander("Your Interests", expanded=False):
     st.caption("Used to suggest new hobbies and personalize your experience.")
 
     interests = st.multiselect(
@@ -158,49 +153,43 @@ with st.container():
         default=[i for i in settings["interests"] if i in INTEREST_OPTIONS],
         label_visibility="collapsed",
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------- PRIVACY & SECURITY ----------
-with st.container():
-    st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.subheader("Privacy & Security")
-    st.caption("Your reflections are entirely your own. Protect your sanctuary with an additional layer of security.")
-
-    app_lock_enabled = st.toggle("App Lock (require a PIN to open the app)", value=settings["app_lock_enabled"])
-
-    if app_lock_enabled:
-        with st.expander("Set / change your PIN"):
-            pin1 = st.text_input("New PIN (4-6 digits)", type="password", max_chars=6, key="pin1")
-            pin2 = st.text_input("Confirm PIN", type="password", max_chars=6, key="pin2")
-            if st.button("Save PIN"):
-                if not pin1.isdigit() or not (4 <= len(pin1) <= 6):
-                    st.error("PIN must be 4-6 digits.")
-                elif pin1 != pin2:
-                    st.error("PINs do not match.")
-                else:
-                    update_user_settings({"app_lock_pin_hash": hash_pin(pin1)})
-                    st.success("PIN saved.")
-
-    biometric_enabled = st.toggle(
-        "Biometric unlock (Touch ID / Face ID)",
-        value=settings["biometric_enabled"],
-        help="Note: browser-based apps can't directly access device biometrics — "
-             "this stores your preference, but true biometric unlock would need a "
-             "native app wrapper.",
-        disabled=not app_lock_enabled,
+# ---------- DELETE ACCOUNT ----------
+with st.expander("Delete Account", expanded=False):
+    st.caption(
+        "This permanently deletes your account and all of your journal entries, "
+        "goals, and settings. This cannot be undone."
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
+    confirm_text = st.text_input(
+        'Type "DELETE" to confirm',
+        key="delete_confirm_input",
+    )
+
+    if st.button("Delete my account", icon=":material/delete_forever:"):
+        if confirm_text.strip().upper() == "DELETE":
+            dm.delete_user_account(username)
+            st.session_state.logged_in = False
+            st.session_state.username = None
+            st.session_state.user_id = None
+            st.success("Account deleted.", icon=":material/check_circle:")
+            st.rerun()
+        else:
+            st.error('Please type "DELETE" exactly to confirm.', icon=":material/error:")
+            
 # ---------- SAVE ----------
-if st.button("💾 Save Settings", type="primary", use_container_width=True):
-    update_user_settings({
-        "frequency": frequency,
-        "reminder_time": reminder_time.strftime("%H:%M"),
-        "push_notifications": push_notifications,
-        "gentle_nudges": gentle_nudges,
-        "streak_goal_minutes": streak_goal,
-        "interests": interests,
-        "app_lock_enabled": app_lock_enabled,
-        "biometric_enabled": biometric_enabled,
-    })
-    st.success("Settings saved!")
+if st.button("Save Settings", icon=":material/save:", type="primary", use_container_width=True):
+    if email_notifications and not email_address.strip():
+        st.error("Add an email address to enable email notifications.", icon=":material/error:")
+    else:
+        save_settings({
+            "frequency": frequency,
+            "reminder_time": reminder_time.strftime("%H:%M"),
+            "push_notifications": push_notifications,
+            "gentle_nudges": gentle_nudges,
+            "email_notifications": email_notifications,
+            "email": email_address.strip(),
+            "streak_goal_minutes": streak_goal,
+            "interests": interests,
+        })
+        st.success("Settings saved!", icon=":material/check_circle:")

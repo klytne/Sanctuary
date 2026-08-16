@@ -8,5 +8,4 @@ __pycache__/
 .streamlit/secrets.toml
 *.pyc
 
-
-
+data_storage/
