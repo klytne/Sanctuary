@@ -256,8 +256,7 @@ with col_stats:
     st.write("")
 
     current_streak, streak_days = get_current_streak_days(all_entries)
-
-    # st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    
     st.markdown('<div class="metric-label">Streak</div>', unsafe_allow_html=True)
     st.markdown(f"🔥 **{current_streak} days**")
 
@@ -302,4 +301,31 @@ if themes:
     st.markdown(chips, unsafe_allow_html=True)
 else:
     st.caption("No recurring themes detected yet — keep journaling to surface patterns.")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------- TIME & FOCUS ALLOCATION ----------
+st.write("")
+st.markdown("##### :material/schedule: Time & Focus Allocation")
+st.caption("Based on hours logged per goal category.")
+
+all_goals = dm.get_user_goals(st.session_state.user_id)
+category_hours = {}
+for g in all_goals:
+    cat = g.get("category", "Uncategorized")
+    category_hours[cat] = category_hours.get(cat, 0) + float(g.get("hours_logged", 0) or 0)
+
+if category_hours:
+    max_hours = max(category_hours.values()) or 1
+    for cat, hrs in sorted(category_hours.items(), key=lambda x: -x[1]):
+        pct = (hrs / max_hours) * 100
+        st.markdown(
+            f'<div style="margin-bottom:14px;">'
+            f'<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">'
+            f'<span>{cat}</span><span>{hrs:g} hrs</span></div>'
+            f'<div class="bar-track"><div class="bar-fill" style="width:{pct}%;"></div></div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+else:
+    st.caption("Log hours on your goals to see time allocation here.")
 st.markdown('</div>', unsafe_allow_html=True)

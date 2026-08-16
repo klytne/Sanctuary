@@ -10,6 +10,8 @@ DATA_DIR = "data_storage"
 USERS_PATH = os.path.join(DATA_DIR, "users", "users.json")
 ENTRIES_PATH = os.path.join(DATA_DIR, "journal_entries", "journal_entries.json")
 QUOTES_PATH = os.path.join(DATA_DIR, "journal_entries", "quote_history.json")
+GOALS_PATH = os.path.join(DATA_DIR, "goals", "goals_data.json")
+HOBBIES_PATH = os.path.join(DATA_DIR, "hobbies", "hobbies_data.json")
 SETTINGS_PATH = os.path.join(DATA_DIR, "settings", "user_settings.json")
 
 
@@ -83,8 +85,6 @@ def get_user_record(username):
 
 
 def delete_user_account(username):
-    """Permanently removes a user's account and every piece of data tied
-    to their user_id (entries, settings). Irreversible."""
     users = load_json(USERS_PATH)
     user = users.pop(username, None)
     save_json(USERS_PATH, users)
@@ -92,7 +92,7 @@ def delete_user_account(username):
     if user:
         user_id = user.get("user_id")
         if user_id:
-            for path in (ENTRIES_PATH, SETTINGS_PATH):
+            for path in (ENTRIES_PATH, GOALS_PATH, HOBBIES_PATH, SETTINGS_PATH):
                 data = load_json(path)
                 if user_id in data:
                     del data[user_id]
@@ -109,6 +109,26 @@ def save_user_entries(user_id, entries):
     all_entries = load_json(ENTRIES_PATH)
     all_entries[user_id] = entries
     save_json(ENTRIES_PATH, all_entries)
+
+
+def get_user_goals(user_id):
+    return load_json(GOALS_PATH).get(user_id, [])
+
+
+def save_user_goals(user_id, goals):
+    all_goals = load_json(GOALS_PATH)
+    all_goals[user_id] = goals
+    save_json(GOALS_PATH, all_goals)
+
+
+def get_user_hobbies(user_id):
+    return load_json(HOBBIES_PATH).get(user_id, [])
+
+
+def save_user_hobbies(user_id, hobbies):
+    all_hobbies = load_json(HOBBIES_PATH)
+    all_hobbies[user_id] = hobbies
+    save_json(HOBBIES_PATH, all_hobbies)
 
 
 def get_user_settings(user_id):
